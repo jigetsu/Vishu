@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vortex TV – Watch Everything in One Place</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue-deep: #020b18;
+      --blue-dark: #041628;
+      --blue-mid: #0a2a4a;
+      --blue-accent: #0d6efd;
+      --blue-bright: #00aaff;
+      --blue-glow: #00d4ff;
+      --blue-light: #7dd3fc;
+      --white: #f0f9ff;
+      --text-muted: #94a3b8;
+      --gold: #f59e0b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--blue-deep);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── PARTICLES ── */
+    #particles {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--blue-glow);
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.2; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(2,11,24,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0,170,255,0.15);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .nav-logo img { height: 40px; filter: drop-shadow(0 0 8px var(--blue-glow)); }
+    .nav-logo span {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 1.5rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+    .hamburger {
+      width: 32px; height: 22px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      cursor: pointer;
+    }
+    .hamburger span {
+      display: block; height: 3px; border-radius: 2px;
+      background: var(--blue-bright);
+      transition: all .3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(6px,6px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px,-6px); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 0; right: -280px; width: 280px; height: 100vh;
+      background: rgba(4,22,40,0.97);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(0,170,255,0.2);
+      z-index: 200; transition: right .4s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column; padding: 90px 32px 40px;
+      gap: 8px;
+    }
+    .sidebar.open { right: 0; }
+    .sidebar a {
+      display: block; padding: 14px 20px;
+      font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 600;
+      color: var(--blue-light); text-decoration: none;
+      border-radius: 10px; letter-spacing: 1px;
+      border: 1px solid transparent;
+      transition: all .25s;
+    }
+    .sidebar a:hover {
+      background: rgba(0,170,255,0.12);
+      border-color: rgba(0,170,255,0.3);
+      color: var(--blue-glow);
+      transform: translateX(6px);
+    }
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .overlay.show { opacity: 1; pointer-events: all; }
+
+    /* ── HERO ── */
+    #home {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+      position: relative;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(13,110,253,0.25) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,255,0.1) 0%, transparent 60%);
+    }
+    .hero-badge {
+      display: inline-block; padding: 6px 18px;
+      border: 1px solid var(--blue-bright);
+      border-radius: 50px; font-size: 0.78rem; letter-spacing: 3px;
+      color: var(--blue-bright); text-transform: uppercase;
+      margin-bottom: 24px;
+      animation: fadeInDown .8s ease both;
+      background: rgba(0,170,255,0.08);
+    }
+    .hero-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(2.8rem, 8vw, 6rem);
+      font-weight: 900; line-height: 1.05;
+      letter-spacing: -1px;
+      animation: fadeInDown .9s .1s ease both;
+    }
+    .hero-title span {
+      background: linear-gradient(90deg, var(--blue-bright), var(--blue-glow), #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      max-width: 620px; margin: 20px auto 0;
+      font-size: 1.15rem; line-height: 1.7; color: var(--blue-light);
+      animation: fadeInDown 1s .2s ease both;
+    }
+    .hero-cta {
+      margin-top: 40px;
+      animation: fadeInDown 1s .35s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, var(--blue-accent), var(--blue-bright));
+      color: #fff; text-decoration: none;
+      font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 700;
+      border-radius: 50px; letter-spacing: 1px;
+      box-shadow: 0 0 30px rgba(0,170,255,0.4), 0 0 60px rgba(0,170,255,0.15);
+      transition: all .3s;
+      cursor: pointer; border: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 0 50px rgba(0,170,255,0.6), 0 0 80px rgba(0,170,255,0.25);
+    }
+    .hero-scroll-line {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      opacity: 0.5;
+    }
+    .scroll-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue-glow);
+      animation: bounce 1.5s infinite;
+    }
+    .scroll-dot:nth-child(2) { animation-delay: .2s; }
+    .scroll-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); opacity: .4; }
+      50% { transform: translateY(8px); opacity: 1; }
+    }
+
+    /* ── WHAT IS SECTION ── */
+    .full-banner {
+      width: 100%; position: relative; overflow: hidden;
+    }
+    .full-banner img {
+      width: 100%; height: 420px; object-fit: cover;
+      display: block;
+      filter: brightness(0.6);
+    }
+    .full-banner .banner-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(2,11,24,0.3) 0%, rgba(2,11,24,0.8) 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .banner-overlay h2 {
+      font-family: 'Exo 2', sans-serif; font-size: clamp(2rem,6vw,4rem);
+      font-weight: 900; letter-spacing: 3px;
+      background: linear-gradient(90deg, #fff, var(--blue-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { position: relative; z-index: 1; }
+    .section-inner {
+      max-width: 1000px; margin: 0 auto; padding: 80px 24px;
+    }
+    .section-label {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-label .bar {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue-accent), var(--blue-glow));
+    }
+    .section-label span {
+      font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--blue-bright); font-family: 'Exo 2', sans-serif; font-weight: 600;
+    }
+    .section-title {
+      font-family: 'Exo 2', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+      line-height: 1.15; margin-bottom: 20px;
+    }
+    .section-title em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--blue-bright), var(--blue-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section-text {
+      font-size: 1.05rem; line-height: 1.85; color: var(--text-muted);
+    }
+    .section-text + .section-text { margin-top: 14px; }
+
+    /* ── INTERFACE ── */
+    #interface { background: rgba(4,22,40,0.5); }
+
+    .interface-block { margin-bottom: 60px; }
+    .interface-block h3 {
+      font-family: 'Exo 2', sans-serif; font-size: 1.4rem; font-weight: 700;
+      color: var(--blue-glow); margin-bottom: 10px;
+    }
+    .interface-block p {
+      font-size: 1rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 28px;
+    }
+
+    .screenshots {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .screenshots.mobile img {
+      width: 100%; border-radius: 18px;
+      border: 2px solid rgba(0,170,255,0.2);
+      box-shadow: 0 8px 40px rgba(0,170,255,0.15);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .screenshots.mobile img:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 20px 60px rgba(0,170,255,0.3);
+    }
+    .screenshots.tv img {
+      width: 100%; border-radius: 10px;
+      border: 2px solid rgba(0,170,255,0.2);
+      box-shadow: 0 8px 40px rgba(0,170,255,0.15);
+      transition: transform .3s, box-shadow .3s;
+      aspect-ratio: 16/9; object-fit: cover;
+    }
+    .screenshots.tv img:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,170,255,0.3);
+    }
+
+    /* ── FEATURES ── */
+    #features { background: var(--blue-deep); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px; margin-top: 48px;
+    }
+    .feature-card {
+      background: rgba(10,42,74,0.6);
+      border: 1px solid rgba(0,170,255,0.15);
+      border-radius: 16px; padding: 28px 24px;
+      transition: all .3s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue-glow), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0,170,255,0.4);
+      background: rgba(10,42,74,0.9);
+      box-shadow: 0 16px 48px rgba(0,170,255,0.15);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(13,110,253,0.3), rgba(0,212,255,0.2));
+      border: 1px solid rgba(0,170,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 16px;
+    }
+    .feature-card h4 {
+      font-family: 'Exo 2', sans-serif; font-size: 1.05rem; font-weight: 700;
+      color: var(--white); margin-bottom: 8px; letter-spacing: .5px;
+    }
+    .feature-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── DOWNLOAD ── */
+    #download {
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(13,110,253,0.18) 0%, transparent 70%);
+      text-align: center;
+    }
+    .download-card {
+      max-width: 440px; margin: 48px auto 0;
+      background: rgba(10,42,74,0.7);
+      border: 1px solid rgba(0,170,255,0.3);
+      border-radius: 24px; padding: 40px 32px;
+      box-shadow: 0 0 60px rgba(0,170,255,0.1);
+    }
+    .download-card .phone-icon {
+      font-size: 4rem; margin-bottom: 16px;
+      filter: drop-shadow(0 0 16px var(--blue-glow));
+    }
+    .download-card p {
+      color: var(--text-muted); font-size: 1rem; margin-bottom: 28px; line-height: 1.6;
+    }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 44px;
+      background: linear-gradient(135deg, #0d6efd, #00aaff);
+      color: #fff; text-decoration: none;
+      font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 800;
+      border-radius: 50px; letter-spacing: 1px;
+      box-shadow: 0 0 30px rgba(0,170,255,0.5), 0 0 70px rgba(0,170,255,0.2);
+      transition: all .3s;
+    }
+    .btn-download:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 0 60px rgba(0,170,255,0.7), 0 0 100px rgba(0,170,255,0.3);
+    }
+    .version-badge {
+      display: inline-block; margin-top: 14px;
+      font-size: 0.75rem; letter-spacing: 2px; color: var(--blue-light);
+      background: rgba(0,170,255,0.1); padding: 4px 14px;
+      border-radius: 20px; border: 1px solid rgba(0,170,255,0.2);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: rgba(4,22,40,0.9);
+      border-top: 1px solid rgba(0,170,255,0.12);
+      padding: 48px 24px 32px;
+      text-align: center;
+    }
+    .footer-logo {
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      margin-bottom: 8px;
+    }
+    .footer-logo img { height: 48px; filter: drop-shadow(0 0 10px var(--blue-glow)); }
+    .footer-logo span {
+      font-family: 'Exo 2', sans-serif; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-glow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .footer-tagline { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 28px; }
+
+    /* Telegram popup */
+    .tg-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #0088cc, #00b4d8);
+      box-shadow: 0 0 20px rgba(0,136,204,0.5);
+      cursor: pointer; margin-bottom: 28px;
+      transition: transform .3s, box-shadow .3s;
+      border: none;
+    }
+    .tg-btn:hover {
+      transform: scale(1.12);
+      box-shadow: 0 0 40px rgba(0,136,204,0.7);
+    }
+    .tg-btn svg { width: 26px; height: 26px; fill: #fff; }
+
+    .tg-popup {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.85);
+      background: rgba(4,22,40,0.98); border: 1px solid rgba(0,170,255,0.4);
+      border-radius: 24px; padding: 32px 32px 24px;
+      z-index: 300; width: 320px;
+      opacity: 0; pointer-events: none;
+      transition: all .35s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 60px rgba(0,170,255,0.25), 0 0 120px rgba(0,170,255,0.1);
+    }
+    .tg-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1; pointer-events: all;
+    }
+    .tg-popup h4 {
+      font-family: 'Exo 2', sans-serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--blue-glow); margin-bottom: 16px; text-align: center;
+    }
+    .tg-popup a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 10px;
+      color: var(--white); text-decoration: none;
+      background: rgba(0,170,255,0.1);
+      border: 1px solid rgba(0,170,255,0.2);
+      font-size: 0.95rem; font-weight: 600;
+      transition: all .25s; margin-bottom: 10px;
+    }
+    .tg-popup a:hover {
+      background: rgba(0,170,255,0.2);
+      border-color: rgba(0,170,255,0.4);
+      transform: translateX(4px);
+    }
+    .tg-popup .close-popup {
+      width: 100%; padding: 10px; border: none; border-radius: 8px;
+      background: rgba(255,255,255,0.05); color: var(--text-muted);
+      cursor: pointer; font-family: 'Rajdhani', sans-serif; font-size: 0.9rem;
+      transition: background .2s;
+    }
+    .tg-popup .close-popup:hover { background: rgba(255,255,255,0.1); }
+
+    .copyright { color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── GLOW DIVIDER ── */
+    .glow-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--blue-bright), var(--blue-glow), var(--blue-bright), transparent);
+      opacity: 0.3;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .screenshots { grid-template-columns: 1fr; }
+      nav { padding: 14px 20px; }
+      .section-inner { padding: 60px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Particles -->
+<canvas id="particles"></canvas>
+
+<!-- Sidebar Overlay -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <a href="#home" onclick="closeSidebar()">🏠 About the App</a>
+  <a href="#features" onclick="closeSidebar()">⚡ Features</a>
+  <a href="#download" onclick="closeSidebar()">📥 Download</a>
+  <a href="#contact" onclick="closeSidebar()">📬 Contact Us</a>
+</div>
+
+<!-- Navbar -->
+<nav>
+  <div class="nav-logo">
+    <img src="https://i.ibb.co/FbK28p3n/38419-removebg-preview.png" alt="Vortex TV Logo" onerror="this.style.display='none'" />
+    <span>VORTEX TV</span>
+  </div>
+  <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hero-badge">🌀 The Ultimate Streaming App</div>
+  <h1 class="hero-title">
+    Watch <span>Everything</span><br/>in One Place
+  </h1>
+  <p class="hero-sub">
+    Vortex TV is your all-in-one entertainment hub where you can watch and download Movies, Web Series, Live TV, and Live Sports Events anytime, anywhere. Enjoy seamless streaming in Full HD quality with a smooth and user-friendly experience.
+  </p>
+  <div class="hero-cta">
+    <a href="#download" class="btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
+      Download Now
+    </a>
+  </div>
+  <div class="hero-scroll-line">
+    <div class="scroll-dot"></div>
+    <div class="scroll-dot"></div>
+    <div class="scroll-dot"></div>
+  </div>
+</section>
+
+<!-- WHAT IS VORTEX TV - Banner -->
+<div class="full-banner">
+  <img src="https://i.ibb.co/Mx1GV3Wz/20260406-114038.jpg" alt="Vortex TV Banner" />
+  <div class="banner-overlay">
+    <h2>What is Vortex TV?</h2>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label reveal"><div class="bar"></div><span>About</span></div>
+    <div class="section-text reveal">
+      Are you looking for a powerful and convenient way to watch movies, web series, and live content for free? If so, Vortex TV is the perfect choice for you. Vortex TV is a fast-growing streaming app that offers a massive collection of Movies, Web Series, Live TV Channels, and Live Sports Events — all in one place with high-quality streaming.
+    </div>
+    <div class="section-text reveal" style="margin-top:16px">
+      Simply download the app, search for your favorite movie, series, or live event, tap play, and start enjoying instantly. With a smooth interface and fast servers, Vortex TV ensures a seamless entertainment experience anytime, anywhere.
+    </div>
+    <div class="section-text reveal" style="margin-top:16px">
+      Vortex TV provides unlimited entertainment, featuring content from multiple sources along with Live TV and real-time sports streaming. If you can't find what you're looking for, you can request it — and we'll do our best to bring it to you.
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- INTERFACE -->
+<section id="interface">
+  <div class="section-inner">
+    <div class="section-label reveal"><div class="bar"></div><span>Interface</span></div>
+    <h2 class="section-title reveal">Vortex TV – <em>Mobile Experience</em></h2>
+
+    <div class="interface-block reveal">
+      <p>Enjoy unlimited entertainment on your mobile with Vortex TV. Watch Movies, Web Series, Live TV, and Live Sports in smooth Full HD quality. Easy search, fast streaming, and quick downloads make your experience seamless anytime, anywhere.</p>
+      <div class="screenshots mobile">
+        <img src="https://i.ibb.co/RkFTV3gN/Screenshot-20260406-114445.jpg" alt="Mobile Screenshot 1" />
+        <img src="https://i.ibb.co/NdxC1xxK/Screenshot-20260406-114500.jpg" alt="Mobile Screenshot 2" />
+        <img src="https://i.ibb.co/C3x5BTnw/Screenshot-20260406-114521.jpg" alt="Mobile Screenshot 3" />
+      </div>
+    </div>
+
+    <h2 class="section-title reveal" style="margin-top:60px">Vortex TV – <em>TV Experience</em></h2>
+    <div class="interface-block reveal">
+      <p>Turn your TV into a complete entertainment hub with Vortex TV. Stream Movies, Series, Live Channels, and Sports on the big screen in stunning HD quality. Simple navigation and remote-friendly design for a perfect living room experience.</p>
+      <div class="screenshots tv">
+        <img src="https://i.ibb.co/99CkVf6P/Screenshot-20260406-142940.jpg" alt="TV Screenshot 1" />
+        <img src="https://i.ibb.co/k692py06/IMG-20260406-143057-645.jpg" alt="TV Screenshot 2" />
+        <img src="https://i.ibb.co/Ngh6qBHB/IMG-20260406-143109-892.jpg" alt="TV Screenshot 3" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-label reveal"><div class="bar"></div><span>Features</span></div>
+    <h2 class="section-title reveal">Everything You <em>Need</em></h2>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">🎥</div>
+        <h4>Multi Quality HD Stream</h4>
+        <p>Stream content in multiple quality options including crystal-clear Full HD for the best visual experience.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">🌐</div>
+        <h4>Multi Audio & Subtitle</h4>
+        <p>Watch foreign movies and shows with ease — choose your preferred language and explore new cultures effortlessly.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">🔀</div>
+        <h4>Multiple Servers</h4>
+        <p>Switch between multiple fast servers for the smoothest streaming experience with zero buffering.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">⬇️</div>
+        <h4>Download Movies & Series</h4>
+        <p>Download your favorite movies and web series and watch them offline anytime, even without internet.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">❤️</div>
+        <h4>Wishlist System</h4>
+        <p>Add movies and shows to your personal wishlist so you never miss what you want to watch next.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">📺</div>
+        <h4>Custom Favorite Channels</h4>
+        <p>Mark your favorite live TV channels and access them instantly from your personal favorites list.</p>
+      </div>
+      <div class="feature-card reveal" style="grid-column: span 1;">
+        <div class="feature-icon">📱</div>
+        <h4>TV & Mobile Compatible</h4>
+        <p>Fully optimized for both Android smartphones and Android TV — enjoy anywhere on any screen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-label reveal" style="justify-content:center"><div class="bar"></div><span>Download</span></div>
+    <h2 class="section-title reveal">Download <em>Vortex TV</em> APK</h2>
+    <p class="reveal" style="color:var(--text-muted);max-width:480px;margin:0 auto;font-size:1rem">
+      Just take care of the Vortex TV &amp; leave the rest to us.
+    </p>
+    <div class="download-card reveal">
+      <div class="phone-icon">📱</div>
+      <p>Download the latest version of Vortex TV for Android. Free to install, no registration required.</p>
+      <a href="https://github.com/Roundertvindia/App/releases/download/v1.0.0/Rounder-TV.apk" class="btn-download">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h10c.55 0 1-.45 1-1v-1H6v1zm3.97-12.96L12 7.07l2.03-2.03C13.4 4.39 12.72 4 12 4s-1.4.39-2.03 1.04zm0 0"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-4.5H9l3-5 3 5h-2v4.5h-2z"/></svg>
+        Download APK
+      </a>
+      <div><span class="version-badge">v1.0.0 · Android</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / CONTACT -->
+<footer id="contact">
+  <div class="footer-logo">
+    <img src="https://i.ibb.co/XfRMnG3g/20260318-141455.png" alt="Vortex TV" onerror="this.style.display='none'" />
+    <span>VORTEX TV</span>
+  </div>
+  <p class="footer-tagline">Watch Everything in One Place</p>
+
+  <button class="tg-btn" onclick="toggleTg()" title="Join Telegram">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.593l-2.95-.924c-.642-.204-.657-.642.136-.953l11.527-4.444c.535-.194 1.003.131.369.976z"/>
+    </svg>
+  </button>
+
+  <!-- Telegram Popup -->
+  <div class="tg-popup" id="tgPopup">
+    <h4>🌀 Join Vortex TV</h4>
+    <a href="https://t.me/official_vortextv" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#29b6f6"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.593l-2.95-.924c-.642-.204-.657-.642.136-.953l11.527-4.444c.535-.194 1.003.131.369.976z"/></svg>
+      Official Channel
+    </a>
+    <a href="https://t.me/official_vortextv" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#29b6f6"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 13.593l-2.95-.924c-.642-.204-.657-.642.136-.953l11.527-4.444c.535-.194 1.003.131.369.976z"/></svg>
+      Chat Group
+    </a>
+    <button class="close-popup" onclick="toggleTg()">Close</button>
+  </div>
+
+  <p class="copyright">Copyright © Vortex TV 2026. All rights reserved.</p>
+</footer>
+
+<script>
+  /* ── Particles ── */
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: canvas.height + 10,
+      size: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.8 + 0.3,
+      opacity: 0,
+      maxOpacity: Math.random() * 0.5 + 0.2,
+      color: Math.random() > 0.5 ? '#00d4ff' : '#0d6efd'
+    };
+  }
+
+  for (let i = 0; i < 60; i++) {
+    const p = createParticle();
+    p.y = Math.random() * canvas.height;
+    p.opacity = Math.random() * p.maxOpacity;
+    particles.push(p);
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => {
+      p.y -= p.speed;
+      p.opacity = Math.min(p.maxOpacity, p.opacity + 0.005);
+      if (p.y < -10) { particles[i] = createParticle(); }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  /* ── Sidebar ── */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  /* ── Telegram popup ── */
+  function toggleTg() {
+    document.getElementById('tgPopup').classList.toggle('show');
+  }
+
+  /* ── Reveal on scroll ── */
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
