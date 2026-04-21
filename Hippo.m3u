@@ -1,7 +1,7 @@
 
 #EXTM3U url-tvg="https://avkb.short.gy/jioepg.xml.gz"
 #EXTINF:-1 tvg-logo="https://i.ibb.co/CKthrhpr/20260420-200519.png" group-title="TATA IPL BY VORTEX TV",STAR SPORTS 1 ENG LOW QUALITY
-http://datahub11.com:80/live/Jen12345/Jen54321/702533..ts
+http://datahub11.com:80/live/Jen12345/Jen54321/702533.ts
 #EXTINF:-1 tvg-logo="https://i.ibb.co/CKthrhpr/20260420-200519.png" group-title="TATA IPL BY VORTEX TV",STAR SPORTS 2 ENG LOW QUALITY
 http://datahub11.com:80/live/Jen12345/Jen54321/702543..ts
 #EXTINF:-1 tvg-logo="https://i.ibb.co/CKthrhpr/20260420-200519.png" group-title="TATA IPL BY VORTEX TV",STAR SPORTS 1 HINDI
