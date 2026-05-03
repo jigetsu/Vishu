@@ -1,0 +1,6 @@
+#EXTM3U
+
+#EXTINF:-1 tvg-name="Colors" group-title="Live TV",Colors
+#EXT-X-KEY:METHOD=AES-128,URI="https://tv.media.jio.com/fallback/bpk-tv/ColorsHD_MOB/Fallback/hls/aes128.key-26af2f960ea559279576e56f487ed3ea-1777766400.pkey"
+
+https://jiotvbpkmob.cdn.jio.com/bpk-tv/ColorsHD_MOB/Fallback/index.m3u8|cookie=__hdnea__=st=1777786077~exp=1777807677~acl=/*~hmac=d9e6ff83df991c5c4339dd6aa35c809505c747207d8d3a32a10e96deb7818ced
